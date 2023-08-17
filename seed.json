@@ -14,346 +14,346 @@
   "messages": {
     "expo-vs-bare": {
       "message1": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "Hey everyone, let's start discussing the differences between Expo and Bare React Native!",
         "timestamp": 1678934567890
       },
       "message2": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "Sure! I've used Expo for my projects, and it's been great for quick development.",
         "timestamp": 1678934589123
       },
       "message3": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "Bare React Native gives more control over the project, but Expo is beginner-friendly.",
         "timestamp": 1678934600123
       },
       "message4": {
-        "senderId": "user1",
-        "text": "That's a good point, user3. But I think Expo's limitations can be frustrating for more advanced developers.",
+        "senderId": "hackerOn",
+        "text": "That's a good point, NegativeThinker. But I think Expo's limitations can be frustrating for more advanced developers.",
         "timestamp": 1678934612345
       },
       "message5": {
-        "senderId": "user2",
-        "text": "I agree with user1. Expo is great for simple apps, but Bare React Native is better for complex projects.",
+        "senderId": "BrainMaster",
+        "text": "I agree with hackerOn. Expo is great for simple apps, but Bare React Native is better for complex projects.",
         "timestamp": 1678934623456
       },
       "message6": {
-        "senderId": "user3",
-        "text": "I see your point, user2. But Expo's built-in libraries and tools can save a lot of time and effort.",
+        "senderId": "NegativeThinker",
+        "text": "I see your point, BrainMaster. But Expo's built-in libraries and tools can save a lot of time and effort.",
         "timestamp": 1678934634567
       },
       "message7": {
-        "senderId": "user1",
-        "text": "That's true, user3. But Bare React Native allows for more customization and optimization.",
+        "senderId": "hackerOn",
+        "text": "That's true, NegativeThinker. But Bare React Native allows for more customization and optimization.",
         "timestamp": 1678934645678
       },
       "message8": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "I think it ultimately depends on the project's requirements and the developer's skill level.",
         "timestamp": 1678934656789
       },
       "message9": {
-        "senderId": "user3",
-        "text": "Agreed, user2. Both Expo and Bare React Native have their strengths and weaknesses.",
+        "senderId": "NegativeThinker",
+        "text": "Agreed, BrainMaster. Both Expo and Bare React Native have their strengths and weaknesses.",
         "timestamp": 1678934667890
       },
       "message10": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "Thanks for the discussion, everyone. I think we've covered a lot of ground!",
         "timestamp": 1678934678901
       },
       "message11": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "Has anyone tried using both Expo and Bare React Native together?",
         "timestamp": 1678934689012
       },
       "message12": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "I haven't, but I'm curious to know how that would work.",
         "timestamp": 1678934700123
       },
       "message13": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "I've heard of some developers using Expo for the UI and Bare React Native for the backend.",
         "timestamp": 1678934711234
       },
       "message14": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "Interesting. I wonder if that would be more efficient than using one or the other.",
         "timestamp": 1678934722345
       },
       "message15": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "It could be worth trying out for a project with specific requirements.",
         "timestamp": 1678934733456
       },
       "message16": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "Definitely. It's always good to experiment with different tools and see what works best.",
         "timestamp": 1678934744567
       },
       "message17": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "Agreed. That's how we learn and improve our skills.",
         "timestamp": 1678934755678
       },
       "message18": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "Thanks for the discussion, everyone. I've learned a lot!",
         "timestamp": 1678934766789
       },
       "message19": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "Same here. It's been great talking with you all!",
         "timestamp": 1678934778901
       },
       "message20": {
-        "senderId": "user2",
-        "text": "Thanks for organizing this chat, user1. It was a lot of fun!",
+        "senderId": "BrainMaster",
+        "text": "Thanks for organizing this chat, hackerOn. It was a lot of fun!",
         "timestamp": 1678934790123
       },
       "message21": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "Before we end this chat, does anyone have any other topics they'd like to discuss?",
         "timestamp": 1678934801234
       },
       "message22": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "I'd like to talk about the best practices for handling user authentication.",
         "timestamp": 1678934812345
       },
       "message23": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "That's a great topic. I've had some challenges with authentication in the past.",
         "timestamp": 1678934823456
       },
       "message24": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "Yes, authentication is a crucial part of any app. Let's discuss some strategies for handling it.",
         "timestamp": 1678934834567
       },
       "message25": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "One approach is to use a third-party authentication service like Firebase or Auth0.",
         "timestamp": 1678934845678
       },
       "message26": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "Another option is to build your own authentication system using a library like Passport.",
         "timestamp": 1678934856789
       },
       "message27": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "Both of those are good options. It's important to consider the security implications of each approach.",
         "timestamp": 1678934867890
       },
       "message28": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "Definitely. You also need to think about how to handle password resets and account recovery.",
         "timestamp": 1678934878901
       },
       "message29": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "And don't forget about two-factor authentication. It's becoming more and more important these days.",
         "timestamp": 1678934890123
       },
       "message30": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "Great points, everyone. Thanks for the discussion!",
         "timestamp": 1678934901234
       },
       "message31": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "Has anyone used GraphQL for their API? I've been hearing a lot about it lately.",
         "timestamp": 1678934912345
       },
       "message32": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "I've used it before and I really like it. It makes it easy to fetch exactly the data you need.",
         "timestamp": 1678934923456
       },
       "message33": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "I've been meaning to try it out. Do you have any resources you'd recommend for learning GraphQL?",
         "timestamp": 1678934934567
       },
       "message34": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "I'd recommend checking out the official GraphQL documentation. It's really well-written and easy to follow.",
         "timestamp": 1678934945678
       },
       "message35": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "There are also some great tutorials on YouTube. I can send you some links if you're interested.",
         "timestamp": 1678934956789
       },
       "message36": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "That would be great, thanks! I'm excited to learn more about GraphQL.",
         "timestamp": 1678934967890
       },
       "message37": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "Speaking of APIs, has anyone used AWS Lambda for serverless computing?",
         "timestamp": 1678934978901
       },
       "message38": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "I have, and I think it's a really powerful tool. It makes it easy to run code without having to manage servers.",
         "timestamp": 1678934990123
       },
       "message39": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "That sounds really interesting. What kind of use cases have you used it for?",
         "timestamp": 1678935001234
       },
       "message40": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "I've used it for things like image resizing and video transcoding. It's great for tasks that don't need to run all the time.",
         "timestamp": 1678935012345
       },
       "message41": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "You can also use it to build entire applications. I've seen some really impressive projects built with Lambda.",
         "timestamp": 1678935023456
       },
       "message42": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "Wow, I had no idea it was so versatile. I'll definitely have to check it out.",
         "timestamp": 1678935034567
       },
       "message43": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "It's definitely worth exploring. There's a bit of a learning curve, but once you get the hang of it, it's really powerful.",
         "timestamp": 1678935045678
       },
       "message44": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "And if you ever need help, there are plenty of resources online. The AWS documentation is really good.",
         "timestamp": 1678935056789
       },
       "message45": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "Thanks for the tips, guys. I'm excited to dive into AWS Lambda and see what I can build.",
         "timestamp": 1678935067890
       },
       "message46": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "Has anyone tried using Docker for containerization?",
         "timestamp": 1678935078901
       },
       "message47": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "Yes, I've used Docker for a few projects. It's a great way to keep your development environment consistent across different machines.",
         "timestamp": 1678935090123
       },
       "message48": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "I've heard that Docker can be a bit tricky to set up. Is that true?",
         "timestamp": 1678935101234
       },
       "message49": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "It can be a bit overwhelming at first, but there are plenty of tutorials and resources available to help you get started.",
         "timestamp": 1678935112345
       },
       "message50": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "And once you get the hang of it, it's really powerful. You can easily spin up new instances of your app for testing and deployment.",
         "timestamp": 1678935123456
       },
       "message51": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "That sounds really useful. I'll have to give Docker a try.",
         "timestamp": 1678935134567
       },
       "message52": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "Speaking of deployment, has anyone used Heroku before?",
         "timestamp": 1678935145678
       },
       "message53": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "I have, and I think it's a great platform for small to medium-sized projects. It's really easy to get started and they have a lot of useful add-ons.",
         "timestamp": 1678935156789
       },
       "message54": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "I've heard that Heroku can be a bit expensive compared to other hosting options. Is that true?",
         "timestamp": 1678935167890
       },
       "message55": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "It can be a bit pricier, but I think it's worth it for the ease of use and convenience. Plus, they have a free tier that's great for testing and small projects.",
         "timestamp": 1678935178901
       }
     },
     "button-color": {
       "message1": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "I think the button color should be a vibrant blue to grab attention.",
         "timestamp": 1678934591234
       },
       "message2": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "I prefer a subtle gray color for buttons, it looks more elegant.",
         "timestamp": 1678934592345
       },
       "message3": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "Agreed, but we should also consider the app's overall color scheme.",
         "timestamp": 1678934593456
       },
       "message4": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "What about using a gradient for the button color?",
         "timestamp": 1678934604567
       },
       "message5": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "That could work, but we need to make sure it doesn't clash with other elements in the app.",
         "timestamp": 1678934615678
       },
       "message6": {
-        "senderId": "user2",
+        "senderId": "BrainMaster",
         "text": "I think we should also consider the accessibility of the button color for users with visual impairments.",
         "timestamp": 1678934626789
       },
       "message7": {
-        "senderId": "user3",
-        "text": "Good point, user2. We should make sure the button color has enough contrast with the background.",
+        "senderId": "NegativeThinker",
+        "text": "Good point, BrainMaster. We should make sure the button color has enough contrast with the background.",
         "timestamp": 1678934637901
       },
       "message8": {
-        "senderId": "user1",
+        "senderId": "hackerOn",
         "text": "We could also use different button colors for different actions in the app.",
         "timestamp": 1678934649012
       },
       "message9": {
-        "senderId": "user2",
-        "text": "That's a good idea, user1. It would make the app more intuitive for users.",
+        "senderId": "BrainMaster",
+        "text": "That's a good idea, hackerOn. It would make the app more intuitive for users.",
         "timestamp": 1678934660123
       },
       "message10": {
-        "senderId": "user3",
+        "senderId": "NegativeThinker",
         "text": "Thanks for the discussion, everyone. I think we have some great ideas for the button color!",
         "timestamp": 1678934671234
       }
     }
   },
   "users": {
-    "user1": {
+    "hackerOn": {
       "username": "alice",
       "displayName": "Alice Johnson",
       "avatar": "https://example.com/avatar/alice.jpg"
     },
-    "user2": {
+    "BrainMaster": {
       "username": "bob",
       "displayName": "Bob Smith",
       "avatar": "https://example.com/avatar/bob.jpg"
     },
-    "user3": {
+    "NegativeThinker": {
       "username": "carol",
       "displayName": "Carol Davis",
       "avatar": "https://example.com/avatar/carol.jpg"
