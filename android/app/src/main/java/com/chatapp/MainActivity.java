@@ -1,4 +1,4 @@
-package com.chatapp;
+package com.norfeldt.chatapp;
 
 import android.os.Bundle;
 
