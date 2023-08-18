@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* ChatAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* ChatAppTests.m */; };
+		04924CD52A8ED8A700303508 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 04924CD42A8ED8A700303508 /* BootSplash.storyboard */; };
 		04B588262A8CC141009FC2B7 /* Fontisto.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 04B588132A8CC141009FC2B7 /* Fontisto.ttf */; };
 		04B588272A8CC141009FC2B7 /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 04B588142A8CC141009FC2B7 /* Octicons.ttf */; };
 		04B588282A8CC141009FC2B7 /* Feather.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 04B588152A8CC141009FC2B7 /* Feather.ttf */; };
@@ -50,6 +51,7 @@
 		00E356EE1AD99517003FC87E /* ChatAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChatAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* ChatAppTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ChatAppTests.m; sourceTree = "<group>"; };
+		04924CD42A8ED8A700303508 /* BootSplash.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = BootSplash.storyboard; path = ChatApp/BootSplash.storyboard; sourceTree = "<group>"; };
 		04B588132A8CC141009FC2B7 /* Fontisto.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Fontisto.ttf; sourceTree = "<group>"; };
 		04B588142A8CC141009FC2B7 /* Octicons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Octicons.ttf; sourceTree = "<group>"; };
 		04B588152A8CC141009FC2B7 /* Feather.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Feather.ttf; sourceTree = "<group>"; };
@@ -155,6 +157,7 @@
 				04B588392A8CC344009FC2B7 /* Fonts */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
+				04924CD42A8ED8A700303508 /* BootSplash.storyboard */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				04B5883A2A8D5908009FC2B7 /* GoogleService-Info.plist */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
@@ -327,6 +330,7 @@
 				04B588342A8CC141009FC2B7 /* EvilIcons.ttf in Resources */,
 				04B588272A8CC141009FC2B7 /* Octicons.ttf in Resources */,
 				04B588322A8CC141009FC2B7 /* FontAwesome.ttf in Resources */,
+				04924CD52A8ED8A700303508 /* BootSplash.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				04B5882C2A8CC141009FC2B7 /* MaterialCommunityIcons.ttf in Resources */,
 				04B588352A8CC141009FC2B7 /* FontAwesome6_Solid.ttf in Resources */,
