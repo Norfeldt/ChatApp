@@ -1,8 +1,12 @@
 import React from 'react'
 import { RouteProp } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { TextInput, Button, List, Avatar } from 'react-native-paper'
-import { firebase } from '@react-native-firebase/database'
+import { TextInput, Button, List, Avatar, Text } from 'react-native-paper'
+import {
+  FirebaseDatabaseTypes,
+  firebase,
+} from '@react-native-firebase/database'
+import storage from '@react-native-firebase/storage'
 
 import { RootStackParamList } from '../../../App'
 import Animated, {
@@ -14,7 +18,7 @@ import {
   useReanimatedKeyboardAnimation,
 } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { LayoutChangeEvent, RefreshControl, ScrollView } from 'react-native'
+import { Image, RefreshControl, ScrollView } from 'react-native'
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>
 type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Chat'>
@@ -35,6 +39,7 @@ export function ChatScreen({ route }: Props) {
   const [message, setMessage] = React.useState<string>('')
   const [messageCount, setMessageCount] = React.useState<number>(50)
   const [refreshing, setRefreshing] = React.useState(false)
+  const storageRef = storage().ref('images/')
 
   React.useEffect(() => {
     setTimeout(() => {
@@ -42,29 +47,44 @@ export function ChatScreen({ route }: Props) {
     }, 300)
   }, [])
   React.useEffect(() => {
-    const messageRef = firebase
-      .app()
-      .database(
-        'https://chatapp-6c027-default-rtdb.europe-west1.firebasedatabase.app'
-      )
-      .ref(`messages/${roomId}`)
+    let messageRef: FirebaseDatabaseTypes.Reference
+    const loadMessages = async () => {
+      messageRef = firebase
+        .app()
+        .database(
+          'https://chatapp-6c027-default-rtdb.europe-west1.firebasedatabase.app'
+        )
+        .ref(`messages/${roomId}`)
 
-    messageRef
-      .orderByChild('timestamp')
-      .limitToLast(messageCount)
-      .on('value', (snapshot) => {
-        const data: RealTimeDatabase['messages'][string] = snapshot.val()
-        if (data) {
-          setMessages(
-            Object.values(data)
-              .map((message) => message)
-              .sort((a, b) => a.timestamp - b.timestamp)
-          )
-          setRefreshing(false)
-        }
-      })
+      messageRef
+        .orderByChild('timestamp')
+        .limitToLast(messageCount)
+        .on('value', async (snapshot) => {
+          const data: RealTimeDatabase['messages'][string] = snapshot.val()
+          if (data) {
+            const preparedMessages = await Promise.all(
+              Object.values(data)
+                .sort((a, b) => a.timestamp - b.timestamp)
+                .map(async (message) => {
+                  const imageUrl = message.image
+                    ? await storage().ref(message.image).getDownloadURL()
+                    : undefined
 
-    return () => messageRef.off('value')
+                  return {
+                    ...message,
+                    image: imageUrl,
+                  }
+                })
+            )
+
+            setMessages(preparedMessages)
+            setRefreshing(false)
+          }
+        })
+    }
+    loadMessages()
+
+    return () => messageRef?.off('value')
   }, [roomId, messageCount])
 
   const { height: keyboardHeight } = useReanimatedKeyboardAnimation()
@@ -86,7 +106,7 @@ export function ChatScreen({ route }: Props) {
       )
       .ref(`messages/${roomId}`)
       .push({
-        senderId: user?.displayName!,
+        senderId: user?.displayName ?? 'Unknown', // in production a firebase function would attach the user uid to the message
         text: message,
         timestamp: firebase.database.ServerValue.TIMESTAMP,
       })
@@ -121,18 +141,35 @@ export function ChatScreen({ route }: Props) {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        onScroll={(event) => {
-          // console.log(event.nativeEvent.contentOffset.y)
-        }}
       >
         <List.Section style={{ flex: 1 }}>
           {messages.map((message, index) => (
             <List.Item
               key={message.timestamp}
-              title={`${message.senderId}: ${message.text}`}
+              title={message.senderId}
               titleNumberOfLines={0}
               titleStyle={{ fontSize: 16 }}
-              description={new Date(message.timestamp).toLocaleString()}
+              // description={new Date(message.timestamp).toLocaleString()}
+              description={() => (
+                <>
+                  {message.image ? (
+                    <Image
+                      source={{
+                        uri: message.image,
+                      }}
+                      style={{
+                        width: 200,
+                        height: 200,
+                        resizeMode: 'cover',
+                      }}
+                    />
+                  ) : null}
+                  <Text variant="bodyMedium">{message.text}</Text>
+                  <Text variant="labelSmall" style={{ textAlign: 'center' }}>
+                    {new Date(message.timestamp).toLocaleString()}
+                  </Text>
+                </>
+              )}
               style={{
                 backgroundColor:
                   message.senderId === user?.displayName ? '#E7E0EC' : '#eee',
@@ -173,7 +210,7 @@ export function ChatScreen({ route }: Props) {
                   )
                 )
               }}
-            />
+            ></List.Item>
           ))}
         </List.Section>
       </Animated.ScrollView>
