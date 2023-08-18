@@ -1,6 +1,7 @@
 package com.norfeldt.chatapp;
 
 import android.os.Bundle;
+import com.zoontek.rnbootsplash.RNBootSplash;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
@@ -38,6 +39,7 @@ public class MainActivity extends ReactActivity {
   // https://reactnavigation.org/docs/getting-started/
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(null);
+    RNBootSplash.init(this);
+    super.onCreate(savedInstanceState);
   }
 }

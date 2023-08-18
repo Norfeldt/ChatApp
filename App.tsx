@@ -10,6 +10,7 @@ import React from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import auth from '@react-native-firebase/auth'
+import RNBootSplash from 'react-native-bootsplash'
 
 // Prefer to do named export since it's easier to rename
 import { LoginScreen } from './src/screens/LoginScreen'
@@ -36,7 +37,14 @@ export function App(): JSX.Element {
   }, [])
 
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      onReady={() => {
+        setTimeout(() => {
+          // Give auth a chance to get check the user
+          RNBootSplash.hide({ fade: true, duration: 500 })
+        }, 500)
+      }}
+    >
       {!authState ? (
         <Stack.Navigator initialRouteName="Login">
           <Stack.Screen name="Login" component={LoginScreen} />
