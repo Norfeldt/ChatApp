@@ -1,7 +1,15 @@
 import React from 'react'
 import { RouteProp } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { TextInput, Button, List, Avatar, Text } from 'react-native-paper'
+import {
+  TextInput,
+  Button,
+  List,
+  Avatar,
+  Text,
+  useTheme,
+  TouchableRipple,
+} from 'react-native-paper'
 import {
   FirebaseDatabaseTypes,
   firebase,
@@ -18,7 +26,9 @@ import {
   useReanimatedKeyboardAnimation,
 } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Image, RefreshControl, ScrollView } from 'react-native'
+import { Image, RefreshControl, ScrollView, View } from 'react-native'
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>
 type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Chat'>
@@ -30,22 +40,19 @@ type Props = {
 
 export function ChatScreen({ route }: Props) {
   const { roomId } = route.params
+  const [initialLoad, setInitialLoad] = React.useState(true)
   const insets = useSafeAreaInsets()
   const contentHeight = useSharedValue(0)
   const inputHeight = useSharedValue(0)
   const scrollViewRef = React.useRef<ScrollView>(null)
   const [user, _setUser] = React.useState(firebase.auth().currentUser)
   const [messages, setMessages] = React.useState<Message[]>([])
-  const [message, setMessage] = React.useState<string>('')
   const [messageCount, setMessageCount] = React.useState<number>(50)
   const [refreshing, setRefreshing] = React.useState(false)
-  const storageRef = storage().ref('images/')
+  const [message, setMessage] = React.useState<string>('')
+  const [imageUri, setImageUri] = React.useState<string>()
+  const theme = useTheme()
 
-  React.useEffect(() => {
-    setTimeout(() => {
-      scrollViewRef.current?.scrollToEnd()
-    }, 300)
-  }, [])
   React.useEffect(() => {
     let messageRef: FirebaseDatabaseTypes.Reference
     const loadMessages = async () => {
@@ -66,17 +73,33 @@ export function ChatScreen({ route }: Props) {
               Object.values(data)
                 .sort((a, b) => a.timestamp - b.timestamp)
                 .map(async (message) => {
-                  const imageUrl = message.image
-                    ? await storage().ref(message.image).getDownloadURL()
-                    : undefined
+                  if (!message.image) return message
 
-                  return {
-                    ...message,
-                    image: imageUrl,
+                  try {
+                    const imageUrl = await storage()
+                      .ref(message.image)
+                      ?.getDownloadURL()
+
+                    return {
+                      ...message,
+                      image: imageUrl,
+                    }
+                  } catch (error) {
+                    return {
+                      ...message,
+                      image: await storage()
+                        .ref('assets/images/no-image.jpg')
+                        ?.getDownloadURL(),
+                    }
                   }
                 })
             )
-
+            if (initialLoad) {
+              setTimeout(() => {
+                scrollViewRef.current?.scrollToEnd()
+              }, 300)
+              setInitialLoad(false)
+            }
             setMessages(preparedMessages)
             setRefreshing(false)
           }
@@ -97,7 +120,10 @@ export function ChatScreen({ route }: Props) {
   }, [keyboardHeight.value])
 
   const sendMessage = async () => {
-    if (message.trim() === '') return
+    if (message.trim() === '' && !imageUri) return
+
+    const image = imageUri ? `images/${Date.now()}` : undefined
+    if (imageUri) await storage().ref(image).putFile(imageUri)
 
     await firebase
       .app()
@@ -109,17 +135,42 @@ export function ChatScreen({ route }: Props) {
         senderId: user?.displayName ?? 'Unknown', // in production a firebase function would attach the user uid to the message
         text: message,
         timestamp: firebase.database.ServerValue.TIMESTAMP,
+        image,
       })
     setMessageCount(messageCount + 1)
     setMessage('')
+    setImageUri(undefined)
     setTimeout(() => {
       scrollViewRef.current?.scrollToEnd()
-    }, 300)
+    }, 500)
   }
   const onRefresh = React.useCallback(() => {
     setRefreshing(true)
     setMessageCount((messageCount) => messageCount + 50)
   }, [])
+
+  const addPhoto = async (from: 'library' | 'camera') => {
+    try {
+      const response =
+        from == 'library'
+          ? await launchImageLibrary({ mediaType: 'photo' })
+          : await launchCamera({ mediaType: 'photo' })
+      if (
+        response.didCancel ||
+        response.errorCode ||
+        !response.assets ||
+        !response.assets.length
+      ) {
+        return
+      }
+      setImageUri(response.assets?.[0]?.uri ?? undefined)
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd()
+      }, 300)
+    } catch (error) {
+      setImageUri(undefined)
+    }
+  }
 
   return (
     <KeyboardControllerView
@@ -149,7 +200,6 @@ export function ChatScreen({ route }: Props) {
               title={message.senderId}
               titleNumberOfLines={0}
               titleStyle={{ fontSize: 16 }}
-              // description={new Date(message.timestamp).toLocaleString()}
               description={() => (
                 <>
                   {message.image ? (
@@ -172,14 +222,18 @@ export function ChatScreen({ route }: Props) {
               )}
               style={{
                 backgroundColor:
-                  message.senderId === user?.displayName ? '#E7E0EC' : '#eee',
+                  message.senderId === user?.displayName
+                    ? theme.colors.inversePrimary
+                    : '#eee',
                 borderRadius: 16,
                 padding: 8,
                 margin: 8,
                 maxWidth: '90%',
                 borderWidth: 1,
                 borderColor:
-                  message.senderId === user?.displayName ? '#6750A4' : 'gray',
+                  message.senderId === user?.displayName
+                    ? theme.colors.primary
+                    : 'gray',
                 alignSelf:
                   message.senderId === user?.displayName
                     ? 'flex-end'
@@ -212,6 +266,54 @@ export function ChatScreen({ route }: Props) {
               }}
             ></List.Item>
           ))}
+          {imageUri ? (
+            <Image
+              source={{ uri: imageUri }}
+              style={{
+                width: 200,
+                height: 200,
+                resizeMode: 'cover',
+                alignSelf: 'center',
+                opacity: 0.5,
+              }}
+            />
+          ) : (
+            <View style={{ flexDirection: 'row', alignSelf: 'center' }}>
+              <TouchableRipple
+                style={{
+                  marginRight: 8,
+                  aspectRatio: 1,
+                  height: 48,
+                  alignSelf: 'center',
+                  justifyContent: 'center',
+                }}
+                onPress={() => addPhoto('library')}
+              >
+                <MaterialIcons
+                  name="photo"
+                  size={48}
+                  color={theme.colors.primary}
+                />
+              </TouchableRipple>
+              <View style={{ width: 24 }}></View>
+              <TouchableRipple
+                style={{
+                  marginRight: 8,
+                  aspectRatio: 1,
+                  height: 48,
+                  alignSelf: 'center',
+                  justifyContent: 'center',
+                }}
+                onPress={() => addPhoto('camera')}
+              >
+                <MaterialIcons
+                  name="camera"
+                  size={48}
+                  color={theme.colors.primary}
+                />
+              </TouchableRipple>
+            </View>
+          )}
         </List.Section>
       </Animated.ScrollView>
       <Animated.View

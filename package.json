@@ -23,6 +23,7 @@
     "react-native-bootsplash": "^4.7.5",
     "react-native-fbsdk": "^3.0.0",
     "react-native-gesture-handler": "^2.12.1",
+    "react-native-image-picker": "5.0.2",
     "react-native-keyboard-controller": "^1.5.8",
     "react-native-paper": "^5.10.1",
     "react-native-reanimated": "^3.4.2",
