@@ -13,6 +13,7 @@ type Message = {
   senderId: string
   text: string
   timestamp: number
+  image?: string
 }
 
 type RealTimeDatabase = {
