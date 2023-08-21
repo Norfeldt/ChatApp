@@ -1737,6 +1737,11 @@
   resolved "https://registry.yarnpkg.com/@react-native-firebase/database/-/database-18.3.0.tgz#eacb7fc6df12b1bc422b6461e80a5404b2b781f1"
   integrity sha512-5brbU6HCM9+JvlxOiRBdpTz712cUP+7Jnp0GwPE7QUi97oUv45dm2945B8cNBfk3pSg2Dh57eOWuzkbo7PqfUA==
 
+"@react-native-firebase/firestore@^18.3.0":
+  version "18.3.0"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/firestore/-/firestore-18.3.0.tgz#b13e053d6029c0a079714d06c9565fdf3d6d83c9"
+  integrity sha512-lf++MjazL+5JH0wvlFb2WFqEtUvULaNy4ahlLYOoNwlCjDyvR3L9mYov6cbBVoSu1AJrQcv9u2aHZApEJKaFZg==
+
 "@react-native-firebase/storage@^18.3.0":
   version "18.3.0"
   resolved "https://registry.yarnpkg.com/@react-native-firebase/storage/-/storage-18.3.0.tgz#d30624d45779ef57985dad8755e5ba67b257a13a"
