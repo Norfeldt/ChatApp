@@ -1,8 +1,8 @@
 /**
  * @format
  */
-
-import { AppRegistry } from 'react-native'
+import React from 'react'
+import { AppRegistry, LogBox } from 'react-native'
 import { PaperProvider } from 'react-native-paper'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { GestureHandlerRootView } from 'react-native-gesture-handler' // https://reactnavigation.org/docs/stack-navigator
@@ -10,7 +10,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler' // https:/
 import { App } from './App'
 import { name as appName } from './app.json'
 
-import { LogBox } from 'react-native'
 LogBox.ignoreLogs([
   'Sending `onAnimatedValueUpdate` with no listeners registered.',
 ])
