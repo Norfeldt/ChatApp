@@ -10,6 +10,11 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler' // https:/
 import { App } from './App'
 import { name as appName } from './app.json'
 
+import { LogBox } from 'react-native'
+LogBox.ignoreLogs([
+  'Sending `onAnimatedValueUpdate` with no listeners registered.',
+])
+
 export default function Main() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
