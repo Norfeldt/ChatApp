@@ -69,4 +69,5 @@ yarn-error.log
 # These files contain information such as your API key, client id, etc., which might not be safe to expose
 google-services.json
 GoogleService-Info.plist
+serviceAccount.json
 .env
