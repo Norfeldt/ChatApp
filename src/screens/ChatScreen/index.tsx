@@ -10,14 +10,11 @@ import {
   useTheme,
   TouchableRipple,
 } from 'react-native-paper'
-import {
-  FirebaseDatabaseTypes,
-  firebase,
-} from '@react-native-firebase/database'
+import { firebase } from '@react-native-firebase/database'
+import firestore from '@react-native-firebase/firestore'
 import storage from '@react-native-firebase/storage'
-
-import { RootStackParamList } from '../../../App'
 import Animated, {
+  useAnimatedRef,
   useAnimatedStyle,
   useSharedValue,
 } from 'react-native-reanimated'
@@ -26,88 +23,113 @@ import {
   useReanimatedKeyboardAnimation,
 } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Image, RefreshControl, ScrollView, View } from 'react-native'
+import { Alert, Image, RefreshControl, ScrollView, View } from 'react-native'
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
+// TODO: setup absolute paths and eslint rules for import arrangement
+import { RootStackParamList } from '../../../App'
+import { firebaseFunctions } from '../../helpers/firebaseFunctions'
+
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>
 type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Chat'>
-
+type EnrichedMessage = Message & { id: string } & Awaited<
+    ReturnType<typeof firebaseFunctions.getUserInfo>
+  >['data']
 type Props = {
   route: ChatScreenRouteProp
   navigation: ChatScreenNavigationProp
 }
 
+const MESSAGE_LIMIT = 50
+
 export function ChatScreen({ route }: Props) {
   const { roomId } = route.params
-  const [initialLoad, setInitialLoad] = React.useState(true)
   const insets = useSafeAreaInsets()
   const contentHeight = useSharedValue(0)
   const inputHeight = useSharedValue(0)
-  const scrollViewRef = React.useRef<ScrollView>(null)
+  const scrollViewRef = useAnimatedRef<ScrollView>()
   const [user, _setUser] = React.useState(firebase.auth().currentUser)
-  const [messages, setMessages] = React.useState<Message[]>([])
-  const [messageCount, setMessageCount] = React.useState<number>(50)
+  // TODO: discuss moving the caching of the firebaseFunctions (as a "singleton") since allows reusing caching when changing rooms
+  const usersInfoCacheRef = React.useRef(
+    new Map<
+      string,
+      Awaited<ReturnType<typeof firebaseFunctions.getUserInfo>>['data']
+    >()
+  )
+  const ongoingFetchesRef = React.useRef(
+    new Map<string, ReturnType<typeof firebaseFunctions.getUserInfo>>()
+  )
+  const [messages, setMessages] = React.useState<EnrichedMessage[]>([])
+  const [messageCount, setMessageCount] = React.useState(MESSAGE_LIMIT)
   const [refreshing, setRefreshing] = React.useState(false)
-  const [message, setMessage] = React.useState<string>('')
+  const [messageText, setMessageText] = React.useState('')
   const [imageUri, setImageUri] = React.useState<string>()
   const theme = useTheme()
 
   React.useEffect(() => {
-    let messageRef: FirebaseDatabaseTypes.Reference
     const loadMessages = async () => {
-      messageRef = firebase
-        .app()
-        .database(
-          'https://chatapp-6c027-default-rtdb.europe-west1.firebasedatabase.app'
-        )
-        .ref(`messages/${roomId}`)
+      const messageRef = firestore()
+        .collection(`chatRooms/${roomId}/messages`)
+        .orderBy('timestamp', 'desc')
+        .limit(messageCount)
 
-      messageRef
-        .orderByChild('timestamp')
-        .limitToLast(messageCount)
-        .on('value', async (snapshot) => {
-          const data: RealTimeDatabase['messages'][string] = snapshot.val()
-          if (data) {
-            const preparedMessages = await Promise.all(
-              Object.values(data)
-                .sort((a, b) => a.timestamp - b.timestamp)
-                .map(async (message) => {
-                  if (!message.image) return message
+      const unsubscribe = messageRef.onSnapshot(async (querySnapshot) => {
+        const data = querySnapshot.docs.reverse().map((doc) => ({
+          ...(doc.data() as Message),
+          id: doc.id,
+        })) as ({ id: string } & Message)[]
+        if (data.length > 0) {
+          const enrichedMessages = await Promise.all(
+            data.map(async (message): Promise<EnrichedMessage> => {
+              const { uid } = message
+              let userInfo = usersInfoCacheRef.current.get(uid)
+              if (!userInfo) {
+                let ongoingFetch = ongoingFetchesRef.current.get(uid)
+                if (!ongoingFetch) {
+                  ongoingFetch = firebaseFunctions.getUserInfo({ uid })
+                  ongoingFetchesRef.current.set(uid, ongoingFetch)
+                }
+                const { data } = await ongoingFetch
+                userInfo = data
+                usersInfoCacheRef.current.set(uid, userInfo)
+                ongoingFetchesRef.current.delete(uid)
+              }
 
-                  try {
-                    const imageUrl = await storage()
-                      .ref(message.image)
-                      ?.getDownloadURL()
+              if (!message.image)
+                return {
+                  ...message,
+                  ...userInfo,
+                }
+              try {
+                const imageUrl = await storage()
+                  .ref(message.image)
+                  ?.getDownloadURL()
 
-                    return {
-                      ...message,
-                      image: imageUrl,
-                    }
-                  } catch (error) {
-                    return {
-                      ...message,
-                      image: await storage()
-                        .ref('assets/images/no-image.jpg')
-                        ?.getDownloadURL(),
-                    }
-                  }
-                })
-            )
-            if (initialLoad) {
-              setTimeout(() => {
-                scrollViewRef.current?.scrollToEnd()
-              }, 300)
-              setInitialLoad(false)
-            }
-            setMessages(preparedMessages)
-            setRefreshing(false)
-          }
-        })
+                return {
+                  ...message,
+                  ...userInfo,
+                  image: imageUrl,
+                }
+              } catch (error) {
+                return {
+                  ...message,
+                  ...userInfo,
+                  image: await storage()
+                    .ref('assets/images/no-image.jpg')
+                    ?.getDownloadURL(), // TODO: use a network independent placeholder for missing images
+                }
+              }
+            })
+          )
+          setMessages(enrichedMessages)
+          setRefreshing(false)
+        }
+      })
+
+      return () => unsubscribe()
     }
     loadMessages()
-
-    return () => messageRef?.off('value')
   }, [roomId, messageCount])
 
   const { height: keyboardHeight } = useReanimatedKeyboardAnimation()
@@ -120,33 +142,31 @@ export function ChatScreen({ route }: Props) {
   }, [keyboardHeight.value])
 
   const sendMessage = async () => {
-    if (message.trim() === '' && !imageUri) return
+    if (messageText.trim() === '' && !imageUri) return
 
     const image = imageUri ? `images/${Date.now()}` : undefined
     if (imageUri) await storage().ref(image).putFile(imageUri)
 
-    await firebase
-      .app()
-      .database(
-        'https://chatapp-6c027-default-rtdb.europe-west1.firebasedatabase.app'
-      )
-      .ref(`messages/${roomId}`)
-      .push({
-        senderId: user?.displayName ?? 'Unknown', // in production a firebase function would attach the user uid to the message
-        text: message,
-        timestamp: firebase.database.ServerValue.TIMESTAMP,
-        image,
-      })
+    const {
+      data: { success },
+    } = await firebaseFunctions.sendMessageFunction({
+      roomId,
+      text: messageText,
+      image,
+    })
+    if (!success) {
+      Alert.alert('Error', 'Error sending message')
+
+      return
+    }
     setMessageCount(messageCount + 1)
-    setMessage('')
+    setMessageText('')
     setImageUri(undefined)
-    setTimeout(() => {
-      scrollViewRef.current?.scrollToEnd()
-    }, 500)
   }
+
   const onRefresh = React.useCallback(() => {
     setRefreshing(true)
-    setMessageCount((messageCount) => messageCount + 50)
+    setMessageCount((messageCount) => messageCount + MESSAGE_LIMIT)
   }, [])
 
   const addPhoto = async (from: 'library' | 'camera') => {
@@ -192,12 +212,17 @@ export function ChatScreen({ route }: Props) {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        onContentSizeChange={(w, h) => {
+          if (messages.length <= MESSAGE_LIMIT) {
+            scrollViewRef.current?.scrollToEnd() // Initial scroll to bottom
+          }
+        }}
       >
         <List.Section style={{ flex: 1 }}>
-          {messages.map((message, index) => (
+          {messages.map((message) => (
             <List.Item
-              key={message.timestamp}
-              title={message.senderId}
+              key={message.id}
+              title={message.displayName}
               titleNumberOfLines={0}
               titleStyle={{ fontSize: 16 }}
               description={() => (
@@ -222,7 +247,7 @@ export function ChatScreen({ route }: Props) {
               )}
               style={{
                 backgroundColor:
-                  message.senderId === user?.displayName
+                  message.uid === user?.uid
                     ? theme.colors.inversePrimary
                     : '#eee',
                 borderRadius: 16,
@@ -231,41 +256,25 @@ export function ChatScreen({ route }: Props) {
                 maxWidth: '90%',
                 borderWidth: 1,
                 borderColor:
-                  message.senderId === user?.displayName
-                    ? theme.colors.primary
-                    : 'gray',
+                  message.uid === user?.uid ? theme.colors.primary : 'gray',
                 alignSelf:
-                  message.senderId === user?.displayName
-                    ? 'flex-end'
-                    : 'flex-start',
+                  message.uid === user?.uid ? 'flex-end' : 'flex-start',
               }}
-              right={(props) =>
-                // using the photo url that comes with the social login
-                message.senderId === user?.displayName &&
-                user.photoURL && (
-                  <Avatar.Image
-                    {...props}
-                    size={48}
-                    source={{ uri: user?.photoURL }}
-                  />
-                )
-              }
-              left={(props) => {
-                // when user is created photoURL should be added to the database under `users/${user.uid}`, but keeping it simple for now
-                return (
-                  message.senderId !== user?.displayName && (
+              {...{
+                [user?.uid === message.uid ? 'right' : 'left']: () => {
+                  return (
                     <Avatar.Image
-                      {...props}
                       size={48}
                       source={{
-                        uri: `https://ui-avatars.com/api/?name=${message.senderId}&size=48`,
+                        uri: message.photoURL,
                       }}
                     />
                   )
-                )
+                },
               }}
             ></List.Item>
           ))}
+
           {imageUri ? (
             <Image
               source={{ uri: imageUri }}
@@ -333,8 +342,8 @@ export function ChatScreen({ route }: Props) {
             flex: 1,
             marginRight: 8,
           }}
-          value={message}
-          onChangeText={setMessage}
+          value={messageText}
+          onChangeText={setMessageText}
           placeholder="Type a message"
           onSubmitEditing={sendMessage}
         />

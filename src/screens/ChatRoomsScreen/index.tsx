@@ -1,7 +1,7 @@
 import React from 'react'
 import { Alert, FlatList, View } from 'react-native'
 import auth from '@react-native-firebase/auth'
-import { firebase } from '@react-native-firebase/database'
+import firestore from '@react-native-firebase/firestore'
 import { List, Button } from 'react-native-paper'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -19,38 +19,39 @@ export function ChatRoomsScreen() {
 
   const fetchChatRooms = React.useCallback(() => {
     setRefreshing(true)
-    // Fetch chat rooms without their messages
-    const chatRoomsRef = firebase
-      .app()
-      .database(
-        'https://chatapp-6c027-default-rtdb.europe-west1.firebasedatabase.app'
-      )
-      .ref('chatRooms')
-    chatRoomsRef.once('value', (snapshot) => {
-      const chatRoomData: RealTimeDatabase['chatRooms'] = snapshot.val()
+    const chatRoomsRef = firestore()
+      .collection('chatRooms')
+      .orderBy('lastMessageTimestamp', 'desc')
 
-      if (chatRoomData) {
-        const chatRoomList = Object.keys(chatRoomData)
-          .map((roomId) => ({
-            roomId,
-            name: chatRoomData[roomId].name,
-            description: chatRoomData[roomId].description,
-            lastMessageTimestamp: chatRoomData[roomId].lastMessageTimestamp,
-          }))
-          .sort((a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp)
+    const unsubscribe = chatRoomsRef.onSnapshot(
+      (querySnapshot) => {
+        querySnapshot = querySnapshot
+
+        const chatRoomList = querySnapshot.docs.map((doc) => {
+          const data = doc.data()
+          return {
+            roomId: doc.id,
+            name: data.name,
+            description: data.description,
+            lastMessageTimestamp: data.lastMessageTimestamp,
+          }
+        })
 
         setChatRooms(chatRoomList)
+        setRefreshing(false)
+      },
+      (error) => {
+        console.error('Error fetching chat rooms: ', error)
+        setRefreshing(false)
       }
-      setRefreshing(false)
-    })
+    )
 
-    // Clean up the listener when the component unmounts
-    return () => chatRoomsRef.off('value')
+    return () => unsubscribe()
   }, [])
 
   React.useEffect(() => {
     fetchChatRooms()
-  }, [fetchChatRooms])
+  }, [fetch])
 
   return (
     <View style={{ flex: 1 }}>

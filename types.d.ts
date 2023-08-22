@@ -7,10 +7,11 @@ type ChatRoom = {
   name: string
   description: string
   lastMessageTimestamp: number
+  pushNotificationSubscribers: string[]
 }
 
 type Message = {
-  senderId: string
+  uid: string
   text: string
   timestamp: number
   image?: string
