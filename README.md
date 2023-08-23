@@ -9,7 +9,7 @@ Created a github project for the code challenge
 Created issues for all the user stories
 
 - [#3 Splash Screen](https://github.com/Norfeldt/ChatApp/issues/3)
-- [#4 Login Scrrren](https://github.com/Norfeldt/ChatApp/issues/4)
+- [#4 Login Screen](https://github.com/Norfeldt/ChatApp/issues/4)
 - [#5 Chat rooms](https://github.com/Norfeldt/ChatApp/issues/5)
 - [#6 Send and receive messages](https://github.com/Norfeldt/ChatApp/issues/6)
 - [#8 Upload of images to chat room](https://github.com/Norfeldt/ChatApp/issues/8)
@@ -17,7 +17,7 @@ Created issues for all the user stories
 
 ## Project flow
 
-To get an overview of how the code base evolved then it's recommended to review the [asc PRs](https://github.com/Norfeldt/ChatApp/pulls?q=is%3Apr+is%3Aclosed+sort%3Acreated-asc) 
+To understand how the code base evolved, you can review the [pull requests in ascending order.](https://github.com/Norfeldt/ChatApp/pulls?q=is%3Apr+is%3Aclosed+sort%3Acreated-asc) 
 
 Did not add Facebook signin in since I had to stop before the agreed deadline due to other meetings taking up my time. Agreed with Henrik that it's okay and created an new user story (issue) for this task ([✨ Facebook Signin](https://github.com/Norfeldt/ChatApp/issues/9)) 
 
@@ -25,16 +25,85 @@ Encountered an issue with the scroll view and pagination. Trying to resolve it b
 
 ## Notes to reviewer
 
-I haven't added many code comments since I try to use explaining names and logic. So it's easier for my colleagees and future me to participate in adding new features.
+**Expo Usage**: I'm accustomed to using Expo for developing React Native apps, especially since they dropped the eject feature.
 
-I'm very much used to using Expo when developing react native apps, since they dropped the eject. So not being able to use a dev-client and EAS together with a physical device did bring some challenges (using intel MacBook Pro 2019). But it was a good challenge not being allowed to used it, since it showed me how much more efficient time I give to the client when using Expo. 
+**Firebase**: Firebase is used as the backend. Firestore is used for the database, and Firebase Authentication is used for user authentication.
 
-Haven't made a test setup but would prefer to have some for the CI/CD and future maintenance.
+**Testing**: The app has been tested on an iPhone 11 Pro and an Android emulator. Haven't made a test setup but would prefer to have some for the CI/CD and future maintenance.
+
+**Dependencies**: All dependencies are listed in the package.json file.
+
+**Environment Variables**: Environment variables are stored in a .env file, which is not included in the repository. 
+
+**Not Committed Fires**:
+
+- google-services.json  `android/app/google-services.json`
+- GoogleService-Info.plist `ios/GoogleService-Info.plist`
+  
+You need to request them from me.
+
+
+### repo structure
+
+```
+.
+├── App.tsx
+├── Gemfile
+├── Gemfile.lock
+├── README.md
+├── __tests__
+│   └── App.test.tsx
+├── app.json
+├── assets
+│   ├── bootsplash_logo.png
+│   ├── bootsplash_logo@1,5x.png
+│   ├── bootsplash_logo@2x.png
+│   ├── bootsplash_logo@3x.png
+│   ├── bootsplash_logo@4x.png
+│   ├── bootsplash_logo_original.png
+│   └── github-project-example.png
+├── babel.config.js
+├── index.js
+├── jest.config.js
+├── jwt.sh
+├── metro.config.js
+├── package.json
+├── react-native.config.js
+├── requests.rest
+├── seed.json
+├── src
+│   ├── components
+│   │   └── PushNotificationWrapper
+│   │       └── index.tsx
+│   ├── helpers
+│   │   └── firebaseFunctions
+│   │       └── index.ts
+│   └── screens
+│       ├── ChatRoomsScreen
+│       │   └── index.tsx
+│       ├── ChatScreen
+│       │   ├── index.tsx
+│       │   └── no-image.jpg
+│       └── LoginScreen
+│           └── index.tsx
+├── tsconfig.json
+├── types.d.ts
+└── yarn.lock
+```
+
 
 ### Coding style:
 
-- Tend to write components for DRY or readability. Keep them in the same file until they are reusable, then they are moved to a `components` directory
-- like to use named exports since renaming with vscode is more safe
+
+Haven't added many code comments since I try to use explaining names and logic. So it's easier for my colleagees and future me to participate in adding new features.
+
+Tend to write components for DRY or readability. Keep them in the same file until they are reusable, then they are moved to a `components` directory.
+
+like to use named exports since renaming with vscode is more safe.
+
+Did not focus on global state management and caching (only did a little caching to avoid requesting the same user information).
+
+Made a simple UI.
 
 
 ### Firebase backend
