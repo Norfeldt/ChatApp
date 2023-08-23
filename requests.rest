@@ -1,0 +1,16 @@
+POST https://fcm.googleapis.com/v1/projects/chatapp-6c027/messages:send
+Content-Type: application/json
+Authorization: Bearer <insert JWT token>
+
+{
+  "message": {
+    "token": "<insert FCM token>",
+    "notification": {
+      "title": "Your Notification Title",
+      "body": "Your Notification Body",
+    },
+    "data": {
+      "roomId": "expo-vs-bare",
+    }
+  }
+}
