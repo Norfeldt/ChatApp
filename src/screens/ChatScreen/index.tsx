@@ -1,5 +1,5 @@
 import React from 'react'
-import { RouteProp } from '@react-navigation/native'
+import { RouteProp, useRoute } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import {
   TextInput,
@@ -9,6 +9,8 @@ import {
   Text,
   useTheme,
   TouchableRipple,
+  Portal,
+  Dialog,
 } from 'react-native-paper'
 import { firebase } from '@react-native-firebase/database'
 import firestore from '@react-native-firebase/firestore'
@@ -60,12 +62,25 @@ export function ChatScreen({ route }: Props) {
   const ongoingFetchesRef = React.useRef(
     new Map<string, ReturnType<typeof firebaseFunctions.getUserInfo>>()
   )
+  const [chatRoom, setChatRoom] = React.useState<ChatRoom>()
   const [messages, setMessages] = React.useState<EnrichedMessage[]>([])
   const [messageCount, setMessageCount] = React.useState(MESSAGE_LIMIT)
   const [refreshing, setRefreshing] = React.useState(false)
   const [messageText, setMessageText] = React.useState('')
   const [imageUri, setImageUri] = React.useState<string>()
+  const [askForPushNotifications, setAskForPushNotifications] =
+    React.useState(false)
   const theme = useTheme()
+
+  React.useEffect(() => {
+    const getChatroom = async () => {
+      const chatRoomRef = firestore().doc(`chatRooms/${roomId}`)
+      const chatRoomSnapshot = await chatRoomRef.get()
+      const chatRoom = chatRoomSnapshot.data() as ChatRoom
+      setChatRoom(chatRoom)
+    }
+    getChatroom()
+  }, [roomId])
 
   React.useEffect(() => {
     const loadMessages = async () => {
@@ -144,6 +159,10 @@ export function ChatScreen({ route }: Props) {
   const sendMessage = async () => {
     if (messageText.trim() === '' && !imageUri) return
 
+    if (chatRoom && !chatRoom.members.includes(user?.uid!)) {
+      setAskForPushNotifications(true)
+    }
+
     const image = imageUri ? `images/${Date.now()}` : undefined
     if (imageUri) await storage().ref(image).putFile(imageUri)
 
@@ -159,6 +178,7 @@ export function ChatScreen({ route }: Props) {
 
       return
     }
+
     setMessageCount(messageCount + 1)
     setMessageText('')
     setImageUri(undefined)
@@ -205,6 +225,11 @@ export function ChatScreen({ route }: Props) {
         scrollViewRef.current?.scrollToEnd()
       }}
     >
+      {askForPushNotifications ? (
+        <PushNotificationSubscriptionDialog
+          chatRoomName={chatRoom?.name ?? 'this chat room'}
+        />
+      ) : null}
       <Animated.ScrollView
         style={[animatedScrollViewStyle]}
         // @ts-ignore
@@ -352,5 +377,39 @@ export function ChatScreen({ route }: Props) {
         </Button>
       </Animated.View>
     </KeyboardControllerView>
+  )
+}
+
+// Tend to write components for DRY or readability. Keep them in the same file until they are reusable, then they are moved to a `components` directory
+function PushNotificationSubscriptionDialog(props: {
+  chatRoomName: ChatRoom['name']
+}) {
+  const { roomId } = useRoute().params as { roomId: string }
+  const [visible, setVisible] = React.useState(true)
+  const hideDialog = () => setVisible(false)
+  const positiveAction = () => {
+    firebaseFunctions.subscribeToChatRoom({
+      roomId,
+    }) // TODO: missing handlers when this fails - revise UX (perhaps a subscribe button in the chat room header?)
+
+    hideDialog()
+  }
+
+  return (
+    <Portal>
+      <Dialog visible={visible} onDismiss={hideDialog}>
+        <Dialog.Title>Push notifications</Dialog.Title>
+        <Dialog.Content>
+          <Text variant="bodyMedium">
+            {`Want to have notifications from ${props.chatRoomName}?`}
+          </Text>
+        </Dialog.Content>
+        <Dialog.Actions>
+          <Button onPress={hideDialog}>No</Button>
+          <View style={{ width: 16 }} />
+          <Button onPress={positiveAction}>Yes</Button>
+        </Dialog.Actions>
+      </Dialog>
+    </Portal>
   )
 }

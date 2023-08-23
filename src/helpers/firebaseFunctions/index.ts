@@ -10,4 +10,10 @@ export const firebaseFunctions = {
   getUserInfo: functions().httpsCallable('getUserInfo') as unknown as (data: {
     uid: string
   }) => Promise<{ data: { displayName: string; photoURL: string } }>,
+
+  subscribeToChatRoom: functions().httpsCallable(
+    'subscribeToChatRoom'
+  ) as unknown as (data: {
+    roomId: string
+  }) => Promise<{ data: { success: boolean } }>,
 }
