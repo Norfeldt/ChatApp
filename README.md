@@ -1,79 +1,371 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Code Challenge
 
-# Getting Started
+Created a github project for the code challenge
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+## Project setup
 
-## Step 1: Start the Metro Server
+![Github Project for ChatApp](assets/github-project-example.png)
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
+Created issues for all the user stories
 
-To start Metro, run the following command from the _root_ of your React Native project:
+- [#3 Splash Screen](https://github.com/Norfeldt/ChatApp/issues/3)
+- [#4 Login Scrrren](https://github.com/Norfeldt/ChatApp/issues/4)
+- [#5 Chat rooms](https://github.com/Norfeldt/ChatApp/issues/5)
+- [#6 Send and receive messages](https://github.com/Norfeldt/ChatApp/issues/6)
+- [#8 Upload of images to chat room](https://github.com/Norfeldt/ChatApp/issues/8)
+- [#7 Push functionality](https://github.com/Norfeldt/ChatApp/issues/7)
 
-```bash
-# using npm
-npm start
+## Project flow
 
-# OR using Yarn
-yarn start
+To get an overview of how the code base evolved then it's recommended to review the [asc PRs](https://github.com/Norfeldt/ChatApp/pulls?q=is%3Apr+is%3Aclosed+sort%3Acreated-asc) 
+
+Did not add Facebook signin in since I had to stop before the agreed deadline due to other meetings taking up my time. Agreed with Henrik that it's okay and created an new user story (issue) for this task ([✨ Facebook Signin](https://github.com/Norfeldt/ChatApp/issues/9)) 
+
+Encountered an issue with the scroll view and pagination. Trying to resolve it became time consuming so created (🐛 "pagination" position when fetching more messages)[https://github.com/Norfeldt/ChatApp/issues/13] bug issue for it.
+
+## Notes to reviewer
+
+I haven't added many code comments since I try to use explaining names and logic. So it's easier for my colleagees and future me to participate in adding new features.
+
+I'm very much used to using Expo when developing react native apps, since they dropped the eject. So not being able to use a dev-client and EAS together with a physical device did bring some challenges (using intel MacBook Pro 2019). But it was a good challenge not being allowed to used it, since it showed me how much more efficient time I give to the client when using Expo. 
+
+Haven't made a test setup but would prefer to have some for the CI/CD and future maintenance.
+
+### Coding style:
+
+- Tend to write components for DRY or readability. Keep them in the same file until they are reusable, then they are moved to a `components` directory
+- like to use named exports since renaming with vscode is more safe
+
+
+### Firebase backend
+
+Started out trying to keep the database simple (since it's a code challenge) by using the realtime database, but had to refactor it to using firestore. 
+
+```
+# Firebase Firestore
+
+## Structure
+
+Firestore Database: chatapp-6c027
+|
+├── users (Collection)
+|   |
+|   ├── [uid] (Document)
+|   |   |
+|   |   └── fcmTokens: string[]
+|   |
+|   └── ... (Other users)
+|
+└── chatRooms (Collection)
+    |
+    ├── [chatRoomId] (Document)
+    |   |
+    |   ├── name: string
+    |   ├── description: string
+    |   ├── lastMessageTimestamp: number
+    |   ├── members: array of user uids
+    |   ├── pushNotificationSubscribers: array of user uids
+    |   |
+    |   └── messages (Sub-collection)
+    |       |
+    |       ├── [messageId] (Document)
+    |       |   |
+    |       |   ├── uid: string
+    |       |   ├── text: string
+    |       |   ├── timestamp: number
+    |       |   └── image?: string
+    |       |
+    |       └── ... (Other messages)
+    |
+    └── ... (Other chat rooms)
 ```
 
-## Step 2: Start your Application
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
+I created a separate repo for the firebase backend so I could seed the database and deploy firebase functions.
 
-### For Android
-
-```bash
-# using npm
-npm run android
-
-# OR using Yarn
-yarn android
+```js
+.
+├── firebase.json
+├── firestore
+│   ├── README.md
+│   ├── package.json
+│   ├── src
+│   │   └── seedFirestore.ts
+│   ├── tsconfig.dev.json
+│   ├── tsconfig.json
+│   └── yarn.lock
+├── firestore.indexes.json
+├── firestore.rules
+├── functions
+│   ├── lib
+│   │   ├── index.js
+│   │   └── index.js.map
+│   ├── package.json
+│   ├── src
+│   │   └── index.ts
+│   ├── tsconfig.dev.json
+│   ├── tsconfig.json
+│   └── yarn.lock
+├── remoteconfig.template.json
+├── serviceAccount.json
+└── storage.rules
 ```
 
-### For iOS
+> ./firestore/src/seedFirestore.ts
 
-```bash
-# using npm
-npm run ios
+```ts
+import { LoremIpsum } from 'lorem-ipsum'
+import admin from 'firebase-admin'
+import serviceAccount from '../../serviceAccount.json'
 
-# OR using Yarn
-yarn ios
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: serviceAccount.project_id,
+    clientEmail: serviceAccount.client_email,
+    privateKey: serviceAccount.private_key,
+  }),
+})
+
+const db = admin.firestore()
+
+const deleteMessagesCollection = async (roomId: string) => {
+  const messagesRef = db.collection('chatRooms').doc(roomId).collection('messages')
+  const messagesSnapshot = await messagesRef.get()
+
+  const batch = db.batch()
+  messagesSnapshot.docs.forEach((doc) => {
+    batch.delete(doc.ref)
+  })
+
+  await batch.commit()
+}
+
+const chatrooms = [
+  {
+    id: 'expo-vs-bare',
+    name: 'expo vs bare 🧟‍♂️',
+    description: 'Discussing Expo vs Bare React Native',
+  },
+  { id: 'button-color', name: 'button color 🔘', description: 'Discussing button colors' },
+  { id: 'random', name: 'random 🎲', description: 'Discussing random stuff' },
+]
+const users = [
+  { uid: 'y0LIXdA6kPe4jArabJ2YIFVZDdk1', fcmTokens: [] },
+  { uid: 'UNgmJu75rnMfcQhtvFMAhd2NHCA3', fcmTokens: [] },
+]
+
+const seedUsers = async () => {
+  for (const user of users) {
+    const userRef = db.collection('users').doc(user.uid)
+    const { uid, ...userWithoutUid } = user
+    await userRef.set(userWithoutUid)
+  }
+}
+
+let seed = 1
+function deterministicRandom(): number {
+  const x = Math.sin(seed++) * 10000
+  return x - Math.floor(x)
+}
+const lorem = new LoremIpsum({
+  random: deterministicRandom,
+})
+const fixTimestamp = 1692144030000
+
+const seedChatrooms = async () => {
+  await seedUsers()
+
+  for (const [index, room] of chatrooms.entries()) {
+    let messages: Message[] = []
+    const messageCount = room.id === chatrooms[0].id ? 65 : 10
+    for (let i = 0; i < messageCount; i++) {
+      // all users are members of all chat rooms except the last room which only has one user
+      const uid = index != chatrooms.length - 1 ? users[i % 2].uid : users[1].uid
+      messages.push({
+        uid,
+        text: lorem.generateSentences(1),
+        timestamp: fixTimestamp + i * 1000,
+      })
+    }
+    if (room.id === chatrooms[1].id) {
+      messages[messages.length - 1].image = 'images/bootsplash_logo.png'
+    }
+    if (room.id === chatrooms[0].id) {
+      messages[messages.length - 50].text = '📃 Message no. 50 📌'
+    }
+
+    console.log(`Seeding ${messages.length} messages for room ${room.id}`)
+    const roomRef = db.collection('chatRooms').doc(room.id)
+    await roomRef.set({
+      ...room,
+      lastMessageTimestamp: messages[messages.length - 1].timestamp,
+      members: messages.reduce((acc, message) => {
+        if (!acc.includes(message.uid)) {
+          acc.push(message.uid)
+        }
+        return acc
+      }, [] as string[]),
+      pushNotificationSubscribers: messages.reduce((acc, message) => {
+        if (!acc.includes(message.uid)) {
+          acc.push(message.uid)
+        }
+        return acc
+      }, [] as string[]),
+    } satisfies ChatRoom)
+    await deleteMessagesCollection(room.id)
+    const messagesRef = roomRef.collection('messages')
+    // Ensure all messages are added before moving to the next chatroom
+    await Promise.all(messages.map((message) => messagesRef.add(message)))
+  }
+}
+
+seedChatrooms()
+  .then(() => {
+    console.log('Seeding completed!')
+    process.exit(0)
+  })
+  .catch((error) => {
+    console.error('Error seeding data:', error)
+  })
+
+// TODO: use mono-repo or other way to share types than manual copy-paste
+type ChatRoom = {
+  name: string
+  description: string
+  lastMessageTimestamp: number
+  members: string[]
+  pushNotificationSubscribers: string[]
+}
+
+type Message = {
+  uid: string
+  text: string
+  timestamp: number
+  image?: string
+}
 ```
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+> ./functions/src/index.ts
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+```ts
+import * as functions from 'firebase-functions'
+import * as admin from 'firebase-admin'
+admin.initializeApp()
 
-## Step 3: Modifying your App
+export const getUserInfo = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated')
+  }
 
-Now that you have successfully run the app, let's modify it.
+  const { uid } = data
+  try {
+    const userRecord = await admin.auth().getUser(uid)
+    return {
+      displayName: userRecord.displayName ?? 'Unknown',
+      photoURL: userRecord.photoURL ?? 'https://placekitten.com/200/200',
+    }
+  } catch (error) {
+    console.error('Error fetching user data:', error)
+    throw new functions.https.HttpsError('internal', 'Unable to fetch user data')
+  }
+})
 
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
+export const sendMessage = functions.https.onCall(
+  async (data: { roomId: string } & Pick<Message, 'text' | 'image'>, context) => {
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated')
+    }
 
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+    const { roomId, ...message } = data
+    const uid = context.auth.uid
+    await admin
+      .firestore()
+      .collection(`chatRooms/${roomId}/messages`)
+      .add({
+        ...message,
+        uid,
+        timestamp: admin.firestore.Timestamp.now().toMillis(),
+      } satisfies Message)
 
-## Congratulations! :tada:
+    return { success: true }
+  }
+)
 
-You've successfully run and modified your React Native App. :partying_face:
+export const onNewMessage = functions.firestore
+  .document('chatRooms/{roomId}/messages/{messageId}')
+  .onCreate(async (snapshot, context) => {
+    const { timestamp, uid, text: body } = snapshot.data() as Message
+    const roomId = context.params.roomId
 
-### Now what?
+    // Update chatroom's lastMessageTimestamp
+    await admin
+      .firestore()
+      .collection('chatRooms')
+      .doc(roomId)
+      .update({
+        lastMessageTimestamp: timestamp,
+        members: admin.firestore.FieldValue.arrayUnion(uid),
+      })
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
+    // Send push notifications to all subscribers
+    const userRecord = await admin.auth().getUser(uid)
+    const chatRoomRef = admin.firestore().collection('chatRooms').doc(roomId)
+    const chatRoomDoc = await chatRoomRef.get()
+    const pushNotificationSubscribers = chatRoomDoc.data()?.pushNotificationSubscribers ?? []
+    const tokens: string[] = []
+    for (const uid of pushNotificationSubscribers) {
+      const userRef = admin.firestore().collection('users').doc(uid)
+      const userDoc = await userRef.get()
+      const fcmTokens = userDoc.data()?.fcmTokens ?? []
+      tokens.push(...fcmTokens)
+    }
 
-# Troubleshooting
+    const payload = {
+      notification: {
+        title: `${userRecord.displayName} 💬`,
+        body,
+      },
+      data: {
+        roomId,
+      },
+    }
 
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+    if (tokens.length > 0) {
+      await admin.messaging().sendEachForMulticast({ tokens, ...payload })
+    }
+  })
 
-# Learn More
+export const subscribeToChatRoom = functions.https.onCall(
+  async (data: { roomId: string }, context) => {
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated')
+    }
 
-To learn more about React Native, take a look at the following resources:
+    const chatRoomRef = admin.firestore().collection('chatRooms').doc(data.roomId)
+    await chatRoomRef.update({
+      pushNotificationSubscribers: admin.firestore.FieldValue.arrayUnion(context.auth.uid),
+    })
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+    return { success: true }
+  }
+)
+
+// TODO: use mono-repo or other way to share types than manual copy-paste
+// @ts-expect-error
+type ChatRoom = {
+  name: string
+  description: string
+  lastMessageTimestamp: number
+  members: string[]
+  pushNotificationSubscribers: string[]
+}
+
+type Message = {
+  uid: string
+  text: string
+  timestamp: number
+  image?: string
+}
+
+```
+
