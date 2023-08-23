@@ -7,6 +7,7 @@ type ChatRoom = {
   name: string
   description: string
   lastMessageTimestamp: number
+  members: string[]
   pushNotificationSubscribers: string[]
 }
 
