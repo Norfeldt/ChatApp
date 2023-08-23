@@ -48,7 +48,6 @@ export function ChatRoomsScreen() {
 
     return () => unsubscribe()
   }, [])
-
   React.useEffect(() => {
     fetchChatRooms()
   }, [fetch])

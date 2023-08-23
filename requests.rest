@@ -2,6 +2,10 @@ POST https://fcm.googleapis.com/v1/projects/chatapp-6c027/messages:send
 Content-Type: application/json
 Authorization: Bearer <insert JWT token>
 
+#  use the vscode extension "REST Client" to send the request
+#  run jwt.sh to get the JWT token created from the service account key file ./ServiceAccount.json
+#  FCM token is logged in the console when the app is run on a device (development mode)
+
 {
   "message": {
     "token": "<insert FCM token>",
