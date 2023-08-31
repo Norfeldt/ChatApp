@@ -1,17 +1,8 @@
 import React from 'react'
 import { RouteProp } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import {
-  TextInput,
-  Button,
-  List,
-  Avatar,
-  Text,
-  useTheme,
-} from 'react-native-paper'
+import { List, Avatar, Text, useTheme } from 'react-native-paper'
 import { firebase } from '@react-native-firebase/database'
-import firestore from '@react-native-firebase/firestore'
-import storage from '@react-native-firebase/storage'
 import Animated, {
   useAnimatedRef,
   useAnimatedStyle,
@@ -22,16 +13,14 @@ import {
   useReanimatedKeyboardAnimation,
 } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Alert, Image, RefreshControl, ScrollView, View } from 'react-native'
+import { Image, RefreshControl, ScrollView, View } from 'react-native'
 
-import { firebaseFunctions } from '../utils/firebaseFunctions'
-import { PushNotificationSubscriptionDialog } from '../components/PushNotificationSubscriptionDialog'
 import { MESSAGE_LIMIT, useMessages } from '../hooks/useMessages'
 import { Loading } from '../components/Loading'
 import { UploadImage } from '../components/UploadImage'
+import { MessageForm } from '../components/MessageForm'
 
 import type { RootStackParamList } from '../../App'
-import type { ChatRoom } from '../types/server'
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>
 type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Chat'>
@@ -47,23 +36,9 @@ export function ChatScreen({ route }: Props) {
   const inputHeight = useSharedValue(0)
   const scrollViewRef = useAnimatedRef<ScrollView>()
   const [user, _setUser] = React.useState(firebase.auth().currentUser)
-  const [chatRoom, setChatRoom] = React.useState<ChatRoom>()
   const messages = useMessages(roomId)
-  const [messageText, setMessageText] = React.useState('')
   const [imageUri, setImageUri] = React.useState<string>()
-  const [askForPushNotifications, setAskForPushNotifications] =
-    React.useState(false)
   const theme = useTheme()
-
-  React.useEffect(() => {
-    const getChatroom = async () => {
-      const chatRoomRef = firestore().doc(`chatRooms/${roomId}`)
-      const chatRoomSnapshot = await chatRoomRef.get()
-      const chatRoom = chatRoomSnapshot.data() as ChatRoom
-      setChatRoom(chatRoom)
-    }
-    getChatroom()
-  }, [roomId])
 
   const { height: keyboardHeight } = useReanimatedKeyboardAnimation()
   const animatedScrollViewStyle = useAnimatedStyle(() => {
@@ -73,33 +48,6 @@ export function ChatScreen({ route }: Props) {
       height: contentHeight.value + keyboardHeight.value - inputHeight.value,
     }
   }, [keyboardHeight.value])
-
-  const sendMessage = async () => {
-    if (messageText.trim() === '' && !imageUri) return
-
-    if (chatRoom && !chatRoom.members.includes(user?.uid!)) {
-      setAskForPushNotifications(true)
-    }
-
-    const image = imageUri ? `images/${Date.now()}` : undefined
-    if (imageUri) await storage().ref(image).putFile(imageUri)
-
-    const {
-      data: { success },
-    } = await firebaseFunctions.sendMessageFunction({
-      roomId,
-      text: messageText,
-      image,
-    })
-    if (!success) {
-      Alert.alert('Error', 'Error sending message')
-
-      return
-    }
-
-    setMessageText('')
-    setImageUri(undefined)
-  }
 
   if (messages.initialLoading) {
     return (
@@ -122,11 +70,6 @@ export function ChatScreen({ route }: Props) {
         scrollViewRef.current?.scrollToEnd()
       }}
     >
-      {askForPushNotifications ? (
-        <PushNotificationSubscriptionDialog
-          chatRoomName={chatRoom?.name ?? 'this chat room'}
-        />
-      ) : null}
       <Animated.ScrollView
         style={[animatedScrollViewStyle]}
         // @ts-ignore
@@ -202,32 +145,7 @@ export function ChatScreen({ route }: Props) {
           <UploadImage {...{ scrollViewRef, imageUri, setImageUri }} />
         </List.Section>
       </Animated.ScrollView>
-      <Animated.View
-        style={[
-          {
-            flexDirection: 'row',
-            alignItems: 'center',
-            padding: 8,
-          },
-        ]}
-        onLayout={(event) => {
-          inputHeight.value = event.nativeEvent.layout.height
-        }}
-      >
-        <TextInput
-          style={{
-            flex: 1,
-            marginRight: 8,
-          }}
-          value={messageText}
-          onChangeText={setMessageText}
-          placeholder="Type a message"
-          onSubmitEditing={sendMessage}
-        />
-        <Button style={{ marginLeft: 8 }} onPress={sendMessage}>
-          Send
-        </Button>
-      </Animated.View>
+      <MessageForm {...{ roomId, inputHeight, imageUri, setImageUri }} />
     </KeyboardControllerView>
   )
 }
