@@ -7,7 +7,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation, NavigationProp } from '@react-navigation/native'
 
-import { RootStackParamList } from '../../../App'
+import { RootStackParamList } from '../../App'
 
 export function ChatRoomsScreen() {
   const [chatRooms, setChatRooms] = React.useState<

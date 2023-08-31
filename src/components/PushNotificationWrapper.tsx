@@ -9,7 +9,7 @@ import messaging, {
 } from '@react-native-firebase/messaging'
 import notifee from '@notifee/react-native'
 
-import { RootStackParamList } from '../../../App'
+import { RootStackParamList } from '../../App'
 
 //  A lot of async logic so keeping the logs for dev mode only 🔈
 const debugLog = (...args: unknown[]): void => {
