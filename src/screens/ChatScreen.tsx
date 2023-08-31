@@ -1,8 +1,6 @@
 import React from 'react'
 import { RouteProp } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { List, Avatar, Text, useTheme } from 'react-native-paper'
-import { firebase } from '@react-native-firebase/database'
 import Animated, {
   useAnimatedRef,
   useAnimatedStyle,
@@ -13,10 +11,11 @@ import {
   useReanimatedKeyboardAnimation,
 } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Image, RefreshControl, ScrollView, View } from 'react-native'
+import { RefreshControl, ScrollView, View } from 'react-native'
 
 import { MESSAGE_LIMIT, useMessages } from '../hooks/useMessages'
 import { Loading } from '../components/Loading'
+import { MessageList } from '../components/MessageList'
 import { UploadImage } from '../components/UploadImage'
 import { MessageForm } from '../components/MessageForm'
 
@@ -35,10 +34,8 @@ export function ChatScreen({ route }: Props) {
   const contentHeight = useSharedValue(0)
   const inputHeight = useSharedValue(0)
   const scrollViewRef = useAnimatedRef<ScrollView>()
-  const [user, _setUser] = React.useState(firebase.auth().currentUser)
   const messages = useMessages(roomId)
   const [imageUri, setImageUri] = React.useState<string>()
-  const theme = useTheme()
 
   const { height: keyboardHeight } = useReanimatedKeyboardAnimation()
   const animatedScrollViewStyle = useAnimatedStyle(() => {
@@ -86,64 +83,9 @@ export function ChatScreen({ route }: Props) {
           }
         }}
       >
-        <List.Section style={{ flex: 1 }}>
-          {messages.data.map((message) => (
-            <List.Item
-              key={message.id}
-              title={message.displayName}
-              titleNumberOfLines={0}
-              titleStyle={{ fontSize: 16 }}
-              description={() => (
-                <>
-                  {message.image ? (
-                    <Image
-                      source={{
-                        uri: message.image,
-                      }}
-                      style={{
-                        width: 200,
-                        height: 200,
-                        resizeMode: 'cover',
-                      }}
-                    />
-                  ) : null}
-                  <Text variant="bodyMedium">{message.text}</Text>
-                  <Text variant="labelSmall" style={{ textAlign: 'center' }}>
-                    {new Date(message.timestamp).toLocaleString()}
-                  </Text>
-                </>
-              )}
-              style={{
-                backgroundColor:
-                  message.uid === user?.uid
-                    ? theme.colors.inversePrimary
-                    : '#eee',
-                borderRadius: 16,
-                padding: 8,
-                margin: 8,
-                maxWidth: '90%',
-                borderWidth: 1,
-                borderColor:
-                  message.uid === user?.uid ? theme.colors.primary : 'gray',
-                alignSelf:
-                  message.uid === user?.uid ? 'flex-end' : 'flex-start',
-              }}
-              {...{
-                [user?.uid === message.uid ? 'right' : 'left']: () => {
-                  return (
-                    <Avatar.Image
-                      size={48}
-                      source={{
-                        uri: message.photoURL,
-                      }}
-                    />
-                  )
-                },
-              }}
-            ></List.Item>
-          ))}
+        <MessageList messages={messages.data}>
           <UploadImage {...{ scrollViewRef, imageUri, setImageUri }} />
-        </List.Section>
+        </MessageList>
       </Animated.ScrollView>
       <MessageForm {...{ roomId, inputHeight, imageUri, setImageUri }} />
     </KeyboardControllerView>
