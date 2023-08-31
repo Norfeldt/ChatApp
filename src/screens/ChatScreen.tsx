@@ -30,8 +30,8 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
 // TODO: setup absolute paths and eslint rules for import arrangement
-import { RootStackParamList } from '../../../App'
-import { firebaseFunctions } from '../../helpers/firebaseFunctions'
+import { RootStackParamList } from '../../App'
+import { firebaseFunctions } from '../helpers/firebaseFunctions'
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>
 type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Chat'>
