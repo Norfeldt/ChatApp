@@ -8,7 +8,7 @@ const QUERY_CHAT_ROOMS = firestore()
   .collection('chatRooms')
   .orderBy('lastMessageTimestamp', 'desc')
 
-type UseChatRoomsResult = {
+type HookResult = {
   data: Array<
     { roomId: string } & Omit<
       ChatRoom,
@@ -20,8 +20,8 @@ type UseChatRoomsResult = {
   refetch: () => void
 }
 
-export function useChatRooms(): UseChatRoomsResult {
-  const [data, setData] = React.useState<UseChatRoomsResult['data']>([])
+export function useChatRooms(): HookResult {
+  const [data, setData] = React.useState<HookResult['data']>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<Error>()
 
