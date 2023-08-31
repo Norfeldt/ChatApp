@@ -73,19 +73,25 @@ You need to request them from me.
 ├── seed.json
 ├── src
 │   ├── components
-│   │   └── PushNotificationWrapper
-│   │       └── index.tsx
-│   ├── helpers
-│   │   └── firebaseFunctions
-│   │       └── index.ts
-│   └── screens
-│       ├── ChatRoomsScreen
-│       │   └── index.tsx
-│       ├── ChatScreen
-│       │   ├── index.tsx
-│       │   └── no-image.jpg
-│       └── LoginScreen
-│           └── index.tsx
+│   │   ├── Loading.tsx
+│   │   ├── MessageForm.tsx
+│   │   ├── MessageList.tsx
+│   │   ├── PushNotificationSubscriptionDialog.tsx
+│   │   ├── PushNotificationWrapper.tsx
+│   │   ├── SignOutButton.tsx
+│   │   └── UploadImage.tsx
+│   ├── hooks
+│   │   ├── useChatRooms.ts
+│   │   ├── useMessages.ts
+│   │   └── useUserInfo.ts
+│   ├── screens
+│   │   ├── ChatRoomsScreen.tsx
+│   │   ├── ChatScreen.tsx
+│   │   └── LoginScreen.tsx
+│   ├── types
+│   │   └── server.d.ts
+│   └── utils
+│       └── firebaseFunctions.ts
 ├── tsconfig.json
 ├── types.d.ts
 └── yarn.lock
@@ -97,13 +103,11 @@ You need to request them from me.
 
 Haven't added many code comments since I try to use explaining names and logic. So it's easier for my colleagees and future me to participate in adding new features.
 
-Tend to write components for DRY or readability. Keep them in the same file until they are reusable, then they are moved to a `components` directory.
-
 like to use named exports since renaming with vscode is more safe.
 
 Did not focus on global state management and caching (only did a little caching to avoid requesting the same user information).
 
-Made a simple UI.
+Made a simple UI without a chat library.
 
 
 ### Firebase backend
