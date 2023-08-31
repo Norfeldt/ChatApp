@@ -6,7 +6,7 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
-    "prestart": "sh ./scripts/check-versions.sh",
+    "prestart": "sh scripts/check-versions.sh && sh scripts/check-for-gitignore-files.sh",
     "start": "react-native start",
     "test": "jest"
   },
