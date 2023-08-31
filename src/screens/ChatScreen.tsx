@@ -27,24 +27,20 @@ import { Alert, Image, RefreshControl, ScrollView, View } from 'react-native'
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
-// TODO: setup absolute paths and eslint rules for import arrangement
 import { firebaseFunctions } from '../utils/firebaseFunctions'
+import { PushNotificationSubscriptionDialog } from '../components/PushNotificationSubscriptionDialog'
+import { MESSAGE_LIMIT, useMessages } from '../hooks/useMessages'
+import { Loading } from '../components/Loading'
 
 import type { RootStackParamList } from '../../App'
-import type { Message, ChatRoom } from '../types/server'
-import { PushNotificationSubscriptionDialog } from '../components/PushNotificationSubscriptionDialog'
+import type { ChatRoom } from '../types/server'
 
 type ChatScreenRouteProp = RouteProp<RootStackParamList, 'Chat'>
 type ChatScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Chat'>
-type EnrichedMessage = Message & { id: string } & Awaited<
-    ReturnType<typeof firebaseFunctions.getUserInfo>
-  >['data']
 type Props = {
   route: ChatScreenRouteProp
   navigation: ChatScreenNavigationProp
 }
-
-const MESSAGE_LIMIT = 50
 
 export function ChatScreen({ route }: Props) {
   const { roomId } = route.params
@@ -53,20 +49,8 @@ export function ChatScreen({ route }: Props) {
   const inputHeight = useSharedValue(0)
   const scrollViewRef = useAnimatedRef<ScrollView>()
   const [user, _setUser] = React.useState(firebase.auth().currentUser)
-  // TODO: discuss moving the caching of the firebaseFunctions (as a "singleton") since allows reusing caching when changing rooms
-  const usersInfoCacheRef = React.useRef(
-    new Map<
-      string,
-      Awaited<ReturnType<typeof firebaseFunctions.getUserInfo>>['data']
-    >()
-  )
-  const ongoingFetchesRef = React.useRef(
-    new Map<string, ReturnType<typeof firebaseFunctions.getUserInfo>>()
-  )
   const [chatRoom, setChatRoom] = React.useState<ChatRoom>()
-  const [messages, setMessages] = React.useState<EnrichedMessage[]>([])
-  const [messageCount, setMessageCount] = React.useState(MESSAGE_LIMIT)
-  const [refreshing, setRefreshing] = React.useState(false)
+  const messages = useMessages(roomId)
   const [messageText, setMessageText] = React.useState('')
   const [imageUri, setImageUri] = React.useState<string>()
   const [askForPushNotifications, setAskForPushNotifications] =
@@ -82,71 +66,6 @@ export function ChatScreen({ route }: Props) {
     }
     getChatroom()
   }, [roomId])
-
-  React.useEffect(() => {
-    const loadMessages = async () => {
-      const messageRef = firestore()
-        .collection(`chatRooms/${roomId}/messages`)
-        .orderBy('timestamp', 'desc')
-        .limit(messageCount)
-
-      const unsubscribe = messageRef.onSnapshot(async (querySnapshot) => {
-        const data = querySnapshot.docs.reverse().map((doc) => ({
-          ...(doc.data() as Message),
-          id: doc.id,
-        })) as ({ id: string } & Message)[]
-        if (data.length > 0) {
-          const enrichedMessages = await Promise.all(
-            data.map(async (message): Promise<EnrichedMessage> => {
-              const { uid } = message
-              let userInfo = usersInfoCacheRef.current.get(uid)
-              if (!userInfo) {
-                let ongoingFetch = ongoingFetchesRef.current.get(uid)
-                if (!ongoingFetch) {
-                  ongoingFetch = firebaseFunctions.getUserInfo({ uid })
-                  ongoingFetchesRef.current.set(uid, ongoingFetch)
-                }
-                const { data } = await ongoingFetch
-                userInfo = data
-                usersInfoCacheRef.current.set(uid, userInfo)
-                ongoingFetchesRef.current.delete(uid)
-              }
-
-              if (!message.image)
-                return {
-                  ...message,
-                  ...userInfo,
-                }
-              try {
-                const imageUrl = await storage()
-                  .ref(message.image)
-                  ?.getDownloadURL()
-
-                return {
-                  ...message,
-                  ...userInfo,
-                  image: imageUrl,
-                }
-              } catch (error) {
-                return {
-                  ...message,
-                  ...userInfo,
-                  image: await storage()
-                    .ref('assets/images/no-image.jpg')
-                    ?.getDownloadURL(), // TODO: use a network independent placeholder for missing images
-                }
-              }
-            })
-          )
-          setMessages(enrichedMessages)
-          setRefreshing(false)
-        }
-      })
-
-      return () => unsubscribe()
-    }
-    loadMessages()
-  }, [roomId, messageCount])
 
   const { height: keyboardHeight } = useReanimatedKeyboardAnimation()
   const animatedScrollViewStyle = useAnimatedStyle(() => {
@@ -180,15 +99,9 @@ export function ChatScreen({ route }: Props) {
       return
     }
 
-    setMessageCount(messageCount + 1)
     setMessageText('')
     setImageUri(undefined)
   }
-
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(true)
-    setMessageCount((messageCount) => messageCount + MESSAGE_LIMIT)
-  }, [])
 
   const addPhoto = async (from: 'library' | 'camera') => {
     try {
@@ -211,6 +124,14 @@ export function ChatScreen({ route }: Props) {
     } catch (error) {
       setImageUri(undefined)
     }
+  }
+
+  if (messages.initialLoading) {
+    return (
+      <View style={{ flex: 1 }}>
+        <Loading />
+      </View>
+    )
   }
 
   return (
@@ -236,16 +157,19 @@ export function ChatScreen({ route }: Props) {
         // @ts-ignore
         ref={scrollViewRef}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={messages.loading}
+            onRefresh={messages.fetchMore}
+          />
         }
         onContentSizeChange={(w, h) => {
-          if (messages.length <= MESSAGE_LIMIT) {
+          if (messages.data.length <= MESSAGE_LIMIT) {
             scrollViewRef.current?.scrollToEnd() // Initial scroll to bottom
           }
         }}
       >
         <List.Section style={{ flex: 1 }}>
-          {messages.map((message) => (
+          {messages.data.map((message) => (
             <List.Item
               key={message.id}
               title={message.displayName}
