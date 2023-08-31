@@ -1,7 +1,7 @@
 import functions from '@react-native-firebase/functions'
+import { Message } from '../types/server'
 
 // this typing has to do, but it would be better if it came from the backend
-
 export const firebaseFunctions = {
   sendMessageFunction: functions().httpsCallable('sendMessage') as unknown as (
     data: { roomId: string } & Pick<Message, 'text' | 'image'>

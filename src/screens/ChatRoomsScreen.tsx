@@ -8,10 +8,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation, NavigationProp } from '@react-navigation/native'
 
 import { RootStackParamList } from '../../App'
+import { ChatRoom } from '../types/server'
 
 export function ChatRoomsScreen() {
   const [chatRooms, setChatRooms] = React.useState<
-    { roomId: string; name: string; description: string }[]
+    ({ roomId: string } & Omit<
+      ChatRoom,
+      'members' | 'pushNotificationSubscribers'
+    >)[]
   >([])
   const [refreshing, setRefreshing] = React.useState(false)
   const navigation = useNavigation<NavigationProp<RootStackParamList>>()
