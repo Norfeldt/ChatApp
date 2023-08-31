@@ -1,100 +1,74 @@
 import React from 'react'
-import { Alert, FlatList, View } from 'react-native'
-import auth from '@react-native-firebase/auth'
-import firestore from '@react-native-firebase/firestore'
-import { List, Button } from 'react-native-paper'
+import { FlatList, StyleSheet, View, ViewStyle } from 'react-native'
+import { Button, List, Text } from 'react-native-paper'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation, NavigationProp } from '@react-navigation/native'
 
 import { RootStackParamList } from '../../App'
-import { ChatRoom } from '../types/server'
+import { SignOutButton } from '../components/SignOutButton'
+import { useChatRooms } from '../hooks/useChatRooms'
 
 export function ChatRoomsScreen() {
-  const [chatRooms, setChatRooms] = React.useState<
-    ({ roomId: string } & Omit<
-      ChatRoom,
-      'members' | 'pushNotificationSubscribers'
-    >)[]
-  >([])
-  const [refreshing, setRefreshing] = React.useState(false)
   const navigation = useNavigation<NavigationProp<RootStackParamList>>()
-  const insets = useSafeAreaInsets()
+  const chatRooms = useChatRooms()
 
-  const fetchChatRooms = React.useCallback(() => {
-    setRefreshing(true)
-    const chatRoomsRef = firestore()
-      .collection('chatRooms')
-      .orderBy('lastMessageTimestamp', 'desc')
-
-    const unsubscribe = chatRoomsRef.onSnapshot(
-      (querySnapshot) => {
-        querySnapshot = querySnapshot
-
-        const chatRoomList = querySnapshot.docs.map((doc) => {
-          const data = doc.data()
-          return {
-            roomId: doc.id,
-            name: data.name,
-            description: data.description,
-            lastMessageTimestamp: data.lastMessageTimestamp,
-          }
-        })
-
-        setChatRooms(chatRoomList)
-        setRefreshing(false)
-      },
-      (error) => {
-        console.error('Error fetching chat rooms: ', error)
-        setRefreshing(false)
-      }
+  if (chatRooms.error) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.margin}>
+          <Text variant="displayMedium">Ups...</Text>
+          <Text variant="displaySmall">Noget gik galt 🤷‍♂️</Text>
+          <View style={styles.spacer} />
+          <Button mode="outlined" onPress={chatRooms.refetch}>
+            Prøv igen
+          </Button>
+        </View>
+      </View>
     )
-
-    return () => unsubscribe()
-  }, [])
-  React.useEffect(() => {
-    fetchChatRooms()
-  }, [fetch])
+  }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       <FlatList
-        data={chatRooms}
+        data={chatRooms.data}
         keyExtractor={(item) => item.roomId}
         renderItem={({ item }) => (
           <List.Item
             title={item.name}
             description={item.description}
-            onPress={() => {
-              navigation.navigate('Chat', { roomId: item.roomId })
-            }}
+            onPress={() => navigation.navigate('Chat', { roomId: item.roomId })}
             right={(props) => <MaterialIcons {...props} name="chevron-right" />}
           />
         )}
-        style={{ flex: 1, flexGrow: 1 }}
-        refreshing={refreshing}
-        onRefresh={fetchChatRooms}
+        style={styles.list}
+        refreshing={chatRooms.loading}
+        onRefresh={chatRooms.refetch}
       />
 
-      <View
-        style={{
-          padding: 16,
-          marginBottom: insets.bottom,
-        }}
-      >
-        <Button
-          mode="outlined"
-          onPress={async () => {
-            try {
-              await auth().signOut()
-            } catch (error: any) {
-              Alert.alert('Error', error.message ?? "Can't sign out")
-            }
-          }}
-        >
-          Sign Out
-        </Button>
-      </View>
+      <SignOutButton mx={16} my={16} />
     </View>
   )
 }
+
+type ClassNames = {
+  container: ViewStyle
+  list: ViewStyle
+  spacer: ViewStyle
+  margin: ViewStyle
+}
+
+const styles = StyleSheet.create<ClassNames>({
+  container: {
+    flex: 1,
+  },
+  list: {
+    flex: 1,
+    flexGrow: 1,
+  },
+  spacer: {
+    height: 32,
+  },
+  margin: {
+    margin: 16,
+  },
+})
