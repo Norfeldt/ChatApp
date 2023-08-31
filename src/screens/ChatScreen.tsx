@@ -8,7 +8,6 @@ import {
   Avatar,
   Text,
   useTheme,
-  TouchableRipple,
 } from 'react-native-paper'
 import { firebase } from '@react-native-firebase/database'
 import firestore from '@react-native-firebase/firestore'
@@ -24,13 +23,12 @@ import {
 } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Alert, Image, RefreshControl, ScrollView, View } from 'react-native'
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker'
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
 import { firebaseFunctions } from '../utils/firebaseFunctions'
 import { PushNotificationSubscriptionDialog } from '../components/PushNotificationSubscriptionDialog'
 import { MESSAGE_LIMIT, useMessages } from '../hooks/useMessages'
 import { Loading } from '../components/Loading'
+import { UploadImage } from '../components/UploadImage'
 
 import type { RootStackParamList } from '../../App'
 import type { ChatRoom } from '../types/server'
@@ -101,29 +99,6 @@ export function ChatScreen({ route }: Props) {
 
     setMessageText('')
     setImageUri(undefined)
-  }
-
-  const addPhoto = async (from: 'library' | 'camera') => {
-    try {
-      const response =
-        from == 'library'
-          ? await launchImageLibrary({ mediaType: 'photo' })
-          : await launchCamera({ mediaType: 'photo' })
-      if (
-        response.didCancel ||
-        response.errorCode ||
-        !response.assets ||
-        !response.assets.length
-      ) {
-        return
-      }
-      setImageUri(response.assets?.[0]?.uri ?? undefined)
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd()
-      }, 300)
-    } catch (error) {
-      setImageUri(undefined)
-    }
   }
 
   if (messages.initialLoading) {
@@ -224,55 +199,7 @@ export function ChatScreen({ route }: Props) {
               }}
             ></List.Item>
           ))}
-
-          {imageUri ? (
-            <Image
-              source={{ uri: imageUri }}
-              style={{
-                width: 200,
-                height: 200,
-                resizeMode: 'cover',
-                alignSelf: 'center',
-                opacity: 0.5,
-              }}
-            />
-          ) : (
-            <View style={{ flexDirection: 'row', alignSelf: 'center' }}>
-              <TouchableRipple
-                style={{
-                  marginRight: 8,
-                  aspectRatio: 1,
-                  height: 48,
-                  alignSelf: 'center',
-                  justifyContent: 'center',
-                }}
-                onPress={() => addPhoto('library')}
-              >
-                <MaterialIcons
-                  name="photo"
-                  size={48}
-                  color={theme.colors.primary}
-                />
-              </TouchableRipple>
-              <View style={{ width: 24 }}></View>
-              <TouchableRipple
-                style={{
-                  marginRight: 8,
-                  aspectRatio: 1,
-                  height: 48,
-                  alignSelf: 'center',
-                  justifyContent: 'center',
-                }}
-                onPress={() => addPhoto('camera')}
-              >
-                <MaterialIcons
-                  name="camera"
-                  size={48}
-                  color={theme.colors.primary}
-                />
-              </TouchableRipple>
-            </View>
-          )}
+          <UploadImage {...{ scrollViewRef, imageUri, setImageUri }} />
         </List.Section>
       </Animated.ScrollView>
       <Animated.View
