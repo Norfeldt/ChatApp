@@ -65,17 +65,21 @@ You need to request them from me.
 ├── babel.config.js
 ├── index.js
 ├── jest.config.js
-├── jwt.sh
 ├── metro.config.js
 ├── package.json
 ├── react-native.config.js
-├── requests.rest
+├── scripts
+│   ├── check-for-gitignore-files.sh
+│   ├── check-versions.sh
+│   ├── jwt.sh
+│   └── requests.rest
 ├── seed.json
 ├── src
 │   ├── components
 │   │   ├── Loading.tsx
 │   │   ├── MessageForm.tsx
 │   │   ├── MessageList.tsx
+│   │   ├── NoInternetBanner.tsx
 │   │   ├── PushNotificationSubscriptionDialog.tsx
 │   │   ├── PushNotificationWrapper.tsx
 │   │   ├── SignOutButton.tsx
