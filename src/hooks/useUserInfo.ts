@@ -1,12 +1,14 @@
 import React from 'react'
 import { firebaseFunctions } from '../utils/firebaseFunctions'
 
+const USER_INFO_CACHE = new Map<string, UserInfo>()
+
 type UserInfo = Awaited<
   ReturnType<typeof firebaseFunctions.getUserInfo>
 >['data']
 
 export const useUserInfo = () => {
-  const usersInfoCacheRef = React.useRef(new Map<string, UserInfo>())
+  const usersInfoCacheRef = React.useRef(USER_INFO_CACHE)
   const ongoingFetchesRef = React.useRef(
     new Map<string, Promise<{ data: UserInfo }>>()
   )
