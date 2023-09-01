@@ -17,6 +17,7 @@ import { LoginScreen } from './src/screens/LoginScreen'
 import { ChatRoomsScreen } from './src/screens/ChatRoomsScreen'
 import { ChatScreen } from './src/screens/ChatScreen'
 import { PushNotificationWrapper } from './src/components/PushNotificationWrapper'
+import { NoInterNetBanner } from './src/components/NoInternetBanner'
 
 export type RootStackParamList = {
   Login: undefined
@@ -44,6 +45,7 @@ export function App(): JSX.Element {
         }, 500)
       }}
     >
+      <NoInterNetBanner />
       <PushNotificationWrapper>
         {!authState ? (
           <Stack.Navigator initialRouteName="Login">
