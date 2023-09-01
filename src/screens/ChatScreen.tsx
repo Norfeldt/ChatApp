@@ -1,4 +1,12 @@
 import React from 'react'
+import {
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from 'react-native'
+import { Text } from 'react-native-paper'
 import { RouteProp } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import Animated, {
@@ -11,7 +19,6 @@ import {
   useReanimatedKeyboardAnimation,
 } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { RefreshControl, ScrollView, View } from 'react-native'
 
 import { MESSAGE_LIMIT, useMessages } from '../hooks/useMessages'
 import { Loading } from '../components/Loading'
@@ -48,18 +55,26 @@ export function ChatScreen({ route }: Props) {
 
   if (messages.initialLoading) {
     return (
-      <View style={{ flex: 1 }}>
+      <View style={styles.container}>
         <Loading />
+      </View>
+    )
+  }
+
+  if (messages.error) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.margin}>
+          <Text variant="displayMedium">Ups...</Text>
+          <Text variant="displaySmall">Noget gik galt 🤷‍♂️</Text>
+        </View>
       </View>
     )
   }
 
   return (
     <KeyboardControllerView
-      style={{
-        flex: 1,
-        paddingBottom: insets.bottom,
-      }}
+      style={[styles.container, { paddingBottom: insets.bottom }]}
       onLayout={(event) => {
         contentHeight.value = event.nativeEvent.layout.height
       }}
@@ -91,3 +106,17 @@ export function ChatScreen({ route }: Props) {
     </KeyboardControllerView>
   )
 }
+
+type ClassNames = {
+  container: ViewStyle
+  margin: ViewStyle
+}
+
+const styles = StyleSheet.create<ClassNames>({
+  container: {
+    flex: 1,
+  },
+  margin: {
+    margin: 16,
+  },
+})
